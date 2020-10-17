@@ -1,8 +1,11 @@
 "use strict";
 
-import { app, protocol, BrowserWindow } from "electron";
+import { app, protocol, BrowserWindow, Menu } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
+import { menuTemplate } from "@/config/menu";
+import path from "path";
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -17,13 +20,16 @@ protocol.registerSchemesAsPrivileged([
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: (process.env
-        .ELECTRON_NODE_INTEGRATION as unknown) as boolean
+        .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
+      preload: path.join(__dirname, "preload.js")
     }
   });
 
@@ -40,6 +46,11 @@ function createWindow() {
   win.on("closed", () => {
     win = null;
   });
+}
+
+function createMenu(win: BrowserWindow | null) {
+  const menu = Menu.buildFromTemplate(menuTemplate(win));
+  Menu.setApplicationMenu(menu);
 }
 
 // Quit when all windows are closed.
@@ -72,6 +83,7 @@ app.on("ready", async () => {
     }
   }
   createWindow();
+  createMenu(win);
 });
 
 // Exit cleanly on request from parent process in development mode.
