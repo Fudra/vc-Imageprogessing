@@ -3,9 +3,16 @@ import Vuex from "vuex";
 
 Vue.use(Vuex);
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RootState {}
+
+import image from "@/store/image";
+
 export default new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
-  modules: {}
+  modules: {
+    image
+  }
 });
