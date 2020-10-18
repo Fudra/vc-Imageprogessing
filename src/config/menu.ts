@@ -17,7 +17,7 @@ export const menuTemplate = (
           accelerator: "CommandOrControl+O",
           click: () => openMatchFiles(win)
         },
-        isMac ? { role: 'close' } : { role: 'quit' }
+        isMac ? { role: "close" } : { role: "quit" }
       ]
     },
     { role: "editMenu" },
