@@ -1,12 +1,12 @@
 module.exports = {
   future: {
     // removeDeprecatedGapUtilities: true,
-    // purgeLayersByDefault: true,
+    purgeLayersByDefault: true
   },
   purge: [],
   theme: {
     extend: {}
   },
   variants: {},
-  plugins: []
+  plugins: [require("@tailwindcss/custom-forms")]
 };
