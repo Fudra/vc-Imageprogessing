@@ -2,27 +2,38 @@ import { ActionContext } from "vuex";
 import { RootState } from "@/store/index";
 
 export interface LoadedImageState {
-  imageDate: HTMLImageElement | null;
+  imageDataOriginal: HTMLImageElement | null;
+  imageDataModified: HTMLImageElement | null;
 }
 
 const mutationTypes = {
-  IMAGE_LOADED: "IMAGE_LOADED"
+  IMAGE_LOADED: "IMAGE_LOADED",
+  MODIFY_IMAGE: "MODIFY_IMAGE",
 };
 
 export default {
   namespaced: true,
   state: {
-    imageDate: null
+    imageDataOriginal: null,
+    imageDataModified: null,
   } as LoadedImageState,
   getters: {
-    imageDate: (state: LoadedImageState) => state.imageDate
+    original: (state: LoadedImageState) => state.imageDataOriginal as ( HTMLImageElement | null),
+    modified: (state: LoadedImageState) => state.imageDataModified as ( HTMLImageElement | null),
   },
   mutations: {
     [mutationTypes.IMAGE_LOADED](
       state: LoadedImageState,
       image: HTMLImageElement
     ) {
-      state.imageDate = image;
+      state.imageDataOriginal = image;
+      state.imageDataModified = image;
+    },
+    [mutationTypes.MODIFY_IMAGE](
+        state: LoadedImageState,
+        image: HTMLImageElement
+    ) {
+      state.imageDataModified = image;
     }
   },
   actions: {
@@ -34,6 +45,15 @@ export default {
       imageElement.src = payload.image;
 
       commit(mutationTypes.IMAGE_LOADED, imageElement);
+    },
+   modifyImage(
+        { commit }: ActionContext<LoadedImageState, RootState>,
+        payload: { image: string }
+    ) {
+      const imageElement = new Image();
+      imageElement.src = payload.image;
+
+      commit(mutationTypes.MODIFY_IMAGE, imageElement);
     }
   }
 };
