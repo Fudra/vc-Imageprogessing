@@ -1,10 +1,9 @@
 <template>
   <div class="flex flex-col">
-    <canvas
-        :width="size.width"
-        :height="size.height"
-        ref="imageCanvas" />
-    <p class="px-4 py-2 text-sm text-gray-700 uppercase">{{ caption }}</p>
+    <canvas :width="size.width" :height="size.height" ref="imageCanvas" />
+    <p class="px-4 py-2 text-sm text-gray-700 uppercase font-semibold">
+      {{ caption }}
+    </p>
   </div>
 </template>
 
@@ -26,8 +25,8 @@ export default Vue.extend({
     return {
       ctx: null,
       size: {
-        width: 400,
-        height: 400
+        width: 600,
+        height: 600
       }
     } as VCCanvasData;
   },
@@ -37,7 +36,7 @@ export default Vue.extend({
       required: true
     },
     imgDataType: {
-      type: Object as PropType<ImageTypes>,
+      type: String as PropType<ImageTypes>,
       default: ImageTypes.ORIGINAL
     }
   },
@@ -46,11 +45,29 @@ export default Vue.extend({
       return this.$store.getters[`image/${this.imgDataType}`];
     }
   },
+  methods: {
+    loadAndScaleImage(imageData: CanvasImageSource) {
+      if (this.ctx == null) return;
+
+      const w = (this.$refs.imageCanvas as HTMLCanvasElement).width;
+      const nw = (imageData as HTMLImageElement).naturalWidth;
+      const nh = (imageData as HTMLImageElement).naturalHeight;
+      const aspect = nw / nh;
+      (this.$refs.imageCanvas as HTMLCanvasElement).height = w / aspect;
+
+      this.ctx.drawImage(
+        imageData,
+        0,
+        0,
+        this.size.width,
+        this.size.height / aspect
+      );
+    }
+  },
   watch: {
     getImage: {
-      handler(imageData) {
-        if (this.ctx == null) return;
-        this.ctx.drawImage(imageData, 0, 0, this.size.width, this.size.height)
+      handler(imageData: CanvasImageSource) {
+        this.loadAndScaleImage(imageData);
       }
     }
   },

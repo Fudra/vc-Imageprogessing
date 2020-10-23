@@ -5,17 +5,11 @@
 
       <div class="flex ">
         <div class="w-1/2 p-4 bg-red-100">
-          <span
-            class="text-sm uppercase leading-relaxed text-gray-700 font-semibold"
-            >orginal</span
-          >
+          <VCCanvas caption="original" :img-data-type="ImageTypes.ORIGINAL" />
         </div>
 
         <div class="w-1/2 p-4 bg-red-100">
-          <span
-            class="text-sm uppercase leading-relaxed text-gray-700 font-semibold"
-            >modified</span
-          >
+          <VCCanvas caption="modified" :img-data-type="ImageTypes.MODIFIED" />
         </div>
       </div>
     </div>
@@ -84,9 +78,18 @@
 
 <script lang="ts">
 import Vue from "vue";
+import VCCanvas from "@/components/VCCanvas.vue";
+import {ImageTypes} from '@/interfaces.ts';
 
 export default Vue.extend({
   name: "ViewHome",
-  components: {}
+  data() {
+    return {
+      ImageTypes,
+    };
+  },
+  components: {
+    VCCanvas,
+  }
 });
 </script>
