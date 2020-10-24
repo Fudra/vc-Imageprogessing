@@ -56,6 +56,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import { ImageTypes } from "@/interfaces";
 
 interface VCBinarizeData {
   threshold: number;
@@ -71,6 +72,56 @@ export default Vue.extend({
       method: "threshold",
       outline: true
     } as VCBinarizeData;
+  },
+  methods: {
+    async binarizeWithThreshold(threshold: number) {
+      console.log("threshold", threshold);
+      // get image
+      const imageData: ImageData = this.$store.getters[`image/originalData`];
+
+      const data = imageData.data;
+
+      // calulate argb to grayscale
+      for (let i = 0; i < data.length; i = i + 4) {
+        let gray = data[i]; // R
+        gray += data[i + 1]; // G
+        gray += data[i + 2]; // B
+
+        gray /= 3;
+
+        const value = gray >= threshold ? 255 : 0;
+
+        // set pixel
+        data[i] = value;
+        data[i + 1] = value;
+        data[i + 2] = value;
+      }
+
+      // set image
+      await this.$store.dispatch("image/setImageData", {
+        imageData,
+        type: ImageTypes.MODIFIED
+      });
+    },
+    colorMask(pixel: number, shift: number) {
+      return (pixel >> shift) & 0xff;
+    },
+    maskRed(pixel: number): number {
+      return this.colorMask(pixel, 16);
+    },
+    maskGreen(pixel: number): number {
+      return this.colorMask(pixel, 8);
+    },
+    maskBlue(pixel: number): number {
+      return this.colorMask(pixel, 0);
+    }
+  },
+  watch: {
+    threshold: {
+      handler(value: number) {
+        this.binarizeWithThreshold(value);
+      }
+    }
   }
 });
 </script>

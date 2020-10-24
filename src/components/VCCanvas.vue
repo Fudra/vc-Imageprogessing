@@ -41,8 +41,14 @@ export default Vue.extend({
     }
   },
   computed: {
-    getImage(): HTMLImageElement | null {
+    image(): HTMLImageElement | null {
       return this.$store.getters[`image/${this.imgDataType}`];
+    },
+    imageData(): ImageData | null {
+      return this.$store.getters[`image/${this.imgDataType}Data`];
+    },
+    lastChangedModified() {
+      return this.$store.getters[`image/lastChangedModified`];
     }
   },
   methods: {
@@ -62,12 +68,43 @@ export default Vue.extend({
         this.size.width,
         this.size.height / aspect
       );
+
+      this.getImageData();
+    },
+    async getImageData() {
+      if (this.ctx == null) return;
+      const canvas = this.$refs.imageCanvas as HTMLCanvasElement;
+      const imageData = this.ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      await this.$store.dispatch("image/setImageData", {
+        imageData,
+        type: this.imgDataType
+      });
     }
   },
   watch: {
-    getImage: {
-      handler(imageData: CanvasImageSource) {
-        this.loadAndScaleImage(imageData);
+    image: {
+      handler(image: CanvasImageSource) {
+        this.loadAndScaleImage(image);
+      }
+    },
+    imageData: {
+      handler(imageData: ImageData) {
+        if (this.ctx == null) return;
+        this.ctx.putImageData(imageData, 0, 0);
+      }
+    },
+    lastChangedModified: {
+      handler() {
+        if (this.ctx == null || this.imageData == null) return;
+        if (this.imgDataType == ImageTypes.ORIGINAL) return;
+        console.log("lastChangedModified");
+        this.ctx.putImageData(this.imageData, 0, 0);
       }
     }
   },
