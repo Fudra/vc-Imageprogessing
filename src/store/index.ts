@@ -7,12 +7,14 @@ Vue.use(Vuex);
 export interface RootState {}
 
 import image from "@/store/image";
+import binarize from "@/store/binarize";
 
 export default new Vuex.Store({
   state: {},
   mutations: {},
   actions: {},
   modules: {
-    image
+    image,
+    binarize
   }
 });
