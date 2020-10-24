@@ -96,15 +96,18 @@ export default Vue.extend({
     imageData: {
       handler(imageData: ImageData) {
         if (this.ctx == null) return;
+        if (this.imgDataType == ImageTypes.ORIGINAL) return;
+        this.ctx.fillRect(0, 0, 600, 600);
         this.ctx.putImageData(imageData, 0, 0);
+        console.log("handler imageData", this.imgDataType)
       }
     },
     lastChangedModified: {
       handler() {
         if (this.ctx == null || this.imageData == null) return;
         if (this.imgDataType == ImageTypes.ORIGINAL) return;
-        console.log("lastChangedModified");
         this.ctx.putImageData(this.imageData, 0, 0);
+        console.log("handler lastChangedModified");
       }
     }
   },

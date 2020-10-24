@@ -27,9 +27,11 @@ export default {
   } as LoadedImageState,
   getters: {
     original: (state: LoadedImageState) => state.imageOriginal as ( HTMLImageElement | null),
-    modified: (state: LoadedImageState) => state.imageModified as ( HTMLImageElement | null),
     originalData: (state: LoadedImageState) => state.imageDataOriginal as ( ImageData | null),
+
+    modified: (state: LoadedImageState) => state.imageModified as ( HTMLImageElement | null),
     modifiedData: (state: LoadedImageState) => state.imageDataModified as ( ImageData | null),
+
     lastChangedModified: (state: LoadedImageState) => state.lastChangedModified,
   },
   mutations: {
@@ -37,6 +39,7 @@ export default {
       state: LoadedImageState,
       image: HTMLImageElement
     ) {
+      console.log("mutationTypes.IMAGE_LOADED")
       state.imageOriginal = image;
       state.imageModified = image;
     },
@@ -44,6 +47,7 @@ export default {
         state: LoadedImageState,
         image: HTMLImageElement
     ) {
+      console.log("mutationTypes.MODIFY_IMAGE")
       state.imageModified = image;
     },
     [mutationTypes.SET_IMAGE_DATA](
@@ -57,9 +61,11 @@ export default {
         case ImageTypes.MODIFIED:
           state.imageDataModified = null
           state.imageDataModified = payload.imageData;
-          //state.lastChangedModified = Date.now()
+          // state.lastChangedModified = Date.now()
           break;
       }
+
+      console.log("mutationTypes.SET_IMAGE_DATA ", payload.type)
     }
   },
   actions: {

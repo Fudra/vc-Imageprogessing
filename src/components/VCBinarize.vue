@@ -73,12 +73,18 @@ export default Vue.extend({
       outline: true
     } as VCBinarizeData;
   },
+  computed: {
+    getOriginalImageData(): ImageData {
+      console.log("getOriginalImageData", Date.now());
+      return this.$store.getters[`image/originalData`];
+    },
+  },
   methods: {
     async binarizeWithThreshold(threshold: number) {
       console.log("threshold", threshold);
       // get image
-      const imageData: ImageData = this.$store.getters[`image/originalData`];
-
+      const imageData: ImageData = this.getOriginalImageData
+      console.log("imageData");
       const data = imageData.data;
 
       // calulate argb to grayscale
@@ -86,10 +92,10 @@ export default Vue.extend({
         let gray = data[i]; // R
         gray += data[i + 1]; // G
         gray += data[i + 2]; // B
+        // gray += data[i + 3]; // A
 
-        gray /= 3;
-
-        const value = gray >= threshold ? 255 : 0;
+        gray = Math.round(gray / 3);
+        const value = gray > threshold ? 255 : 0;
 
         // set pixel
         data[i] = value;
@@ -99,7 +105,7 @@ export default Vue.extend({
 
       // set image
       await this.$store.dispatch("image/setImageData", {
-        imageData,
+        imageData: new ImageData(data, 600),
         type: ImageTypes.MODIFIED
       });
     },
