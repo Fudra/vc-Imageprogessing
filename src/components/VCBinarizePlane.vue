@@ -6,14 +6,14 @@
 
     <div class="">
       <label
-          for="methode"
-          class="block text-sm font-medium leading-5 text-gray-700"
-      >Method</label
+        for="methode"
+        class="block text-sm font-medium leading-5 text-gray-700"
+        >Method</label
       >
       <select
-          id="methode"
-          v-model="method"
-          class="mt-1 block form-select w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+        id="methode"
+        v-model="method"
+        class="mt-1 block form-select w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
       >
         <option value="copy">Copy Data</option>
         <option value="threshold">Threshold</option>
@@ -23,35 +23,33 @@
 
     <div class="">
       <label
-          for="threshold"
-          class="block text-sm font-medium leading-5 text-gray-700"
-      >Threshold
+        for="threshold"
+        class="block text-sm font-medium leading-5 text-gray-700"
+        >Threshold
         <span class="text-gray-600 text-right">({{ threshold }})</span>
-
-      </label
-      >
+      </label>
       <input
-          id="threshold"
-          type="range"
-          v-model="threshold"
-          min="0"
-          max="255"
-          value="128"
-          class="block form-range w-full py-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
+        id="threshold"
+        type="range"
+        v-model="threshold"
+        min="0"
+        max="255"
+        value="128"
+        class="block form-range w-full py-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition duration-150 ease-in-out sm:text-sm sm:leading-5"
       />
     </div>
 
     <div class="flex items-center">
       <input
-          id="outline"
-          name="outline"
-          type="checkbox"
-          v-model="hasOutline"
-          class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+        id="outline"
+        name="outline"
+        type="checkbox"
+        v-model="hasOutline"
+        class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
       />
       <label for="outline" class="ml-3">
         <span class="block text-sm leading-5 font-medium text-gray-700"
-        >Outline</span
+          >Outline</span
         >
       </label>
     </div>
@@ -62,6 +60,8 @@
 /* eslint-disable */
 import Vue, {PropType} from "vue";
 import {ImageTypes, ModifiedImage} from "@/interfaces";
+import isoDataMixin from "@/mixins/isoDataMixin";
+import outlineMixin from "@/mixins/outlineMixin";
 
 interface VCBinarizeData {
   threshold: number;
@@ -71,6 +71,7 @@ interface VCBinarizeData {
 
 export default Vue.extend({
   name: "VCBinarizePlane",
+  mixins: [isoDataMixin, outlineMixin],
   data() {
     return {
       threshold: 128,
@@ -82,6 +83,10 @@ export default Vue.extend({
     image: {
       type: Object as PropType<ModifiedImage>,
       required: true
+    },
+    grayColorCount: {
+      type: Array as PropType<Array<number>>,
+      required: true,
     }
   },
   methods: {
@@ -135,25 +140,12 @@ export default Vue.extend({
     isoData() {
       const data = new Uint8ClampedArray(this.image.imageData.data);
 
-      let countData: number[] = new Array(256).fill(0);
+      let countData = this.grayColorCount;
 
       // isodata
       let value = 127;
       let oldValue = 0;
-
-      // sum data
-      for (let i = 0; i < data.length; i = i + 4) {
-        let gray = data[i]; // R
-        gray += data[i + 1]; // G
-        gray += data[i + 2]; // B
-        // gray += data[i + 3]; // A
-
-        gray = Math.round(gray / 3);
-
-        countData[gray]++;
-      }
-
-
+      
       do {
         oldValue = value;
         const pa = this.calculateP(countData, 0, value - 1);
@@ -170,169 +162,35 @@ export default Vue.extend({
       this.threshold = value;
     },
 
-    // helper iso data
-    calculateP(data: number[], min: number, max: number) {
-      let sum = 0;
-
-      for (let i = min; i < max; i++) {
-        sum += data[i];
-      }
-
-      return sum;
-    },
-    calculateU(data: number[], p: number, min: number, max: number) {
-      const reciprocalP = 1 / p;
-
-      let sum = 0;
-
-      for (let i = min; i < max; i++) {
-        sum += i * data[i];
-      }
-
-      return reciprocalP * sum;
-    },
-    newT(uak: number, ubk: number) {
-      return Math.round((uak + ubk) / 2);
-    },
-    // end helper isodata
-
+    // countPixels(data: Uint8ClampedArray):number[] {
+    //
+    //   let countData: number[] = new Array(256).fill(0);
+    //   // sum data
+    //   for (let i = 0; i < data.length; i = i + 4) {
+    //     let gray = data[i]; // R
+    //     gray += data[i + 1]; // G
+    //     gray += data[i + 2]; // B
+    //
+    //     gray = Math.round(gray / 3);
+    //
+    //     countData[gray]++;
+    //   }
+    //
+    //   return countData;
+    // },
+    
     outline(imageData: ImageData):ImageData {
       let data = this.convertImageDataToArrayValue(imageData);
 
       // Step 1; I erosion H
-      let iDashed = this.invertData(this.dilation(imageData, this.invertData(data)));
+      let iDashedNot = this.dilation(imageData, this.invertData(data));
 
       // Step 2: I \cap not(iDashed)
-      let result = this.imageCapImageDashed(data, iDashed);
+      let result = this.imageCapImageDashed(data, iDashedNot, true);
 
       return this.convertArrayValueToImageData(result, imageData.width);
     },
-
-    // helper outline
-    convertImageDataToArrayValue(imageData: ImageData) {
-      let data: number[] = [];
-
-      for (let i = 0; i < imageData.data.length; i = i + 4) {
-        data.push(imageData.data[i]);
-      }
-
-      return data;
-    },
-
-
-    convertArrayValueToImageData(data: number[], width: number ): ImageData {
-      let expandData: number[] = [];
-
-      for (let i = 0; i < data.length; i++) {
-        expandData.push(
-            data[i],// R
-            data[i],// R
-            data[i],// R
-            255,// A
-        );
-      }
-
-      return new ImageData(new Uint8ClampedArray(expandData), width);
-    },
-
-    invertData(data:number[]):number[] {
-      let invData:number[] = [];
-
-      for (let i = 0; i < data.length; i++) {
-        invData.push( data[i] === 0 ? 255 : 0);
-      }
-
-      return invData;
-    },
-
-    imageCapImageDashed(image: number[], imageDashed: number[]) {
-      let result: number[] = [];
-
-      const invImage = this.invertData(imageDashed);
-
-      for (let i = 0; i < image.length; i++) {
-        result.push(
-            invImage[i] === 0 ? image[i] : 255
-        );
-      }
-
-      return result;
-    },
-
-    dilation(imageData: ImageData, data: number[]): number[] {
-      const dataDashed:number[] = [];
-
-      for (let y = 0; y < imageData.height; y++) {
-        for (let x = 0; x < imageData.width; x++) {
-
-          if(this.applyMaskAtPosition(imageData, data, x, y)) {
-            dataDashed.push(255)
-          } else  {
-            dataDashed.push(0)
-          }
-        }
-      }
-
-      return dataDashed;
-    },
-
-    applyMaskAtPosition(imageData: ImageData, data: number[], x: number, y: number): boolean {
-      let isApplicable = true;
-
-      for (let yPos = -1; yPos <= 1; yPos++) {
-
-        const calcY = y + yPos;
-
-        if (calcY < 0 || calcY > imageData.height) {
-          continue;
-        }
-
-        for (let xPos = -1; xPos <= 1; xPos++) {
-          const calcX = x + xPos;
-
-          if (calcX < 0 || calcX > imageData.width) {
-            continue;
-          }
-
-          if (this.getMaskValue(xPos, yPos)) {
-            isApplicable = isApplicable && data[calcY * imageData.width + calcX] === 255
-          }
-        }
-      }
-
-      return isApplicable;
-    },
-
-    getMaskValue(x: number, y: number) {
-      // r = 1
-      const H = [
-        [0, 1, 0],
-        [1, 1, 1],
-        [0, 1, 0]
-      ];
-
-      return H[x + 1][y + 1]
-    },
-
-    // credit: https://stackoverflow.com/a/27706656
-    getPixel(imageData: ImageData, index: number) {
-      const i = index * 4;
-      const data = imageData.data;
-      return [
-        data[i],
-        data[i + 1],
-        data[i + 2],
-        data[i + 3]
-      ] // Returns array [R,G,B,A]
-    },
-    // credit: https://stackoverflow.com/a/27706656
-    getPixelXY(imageData: ImageData, x: number, y: number) {
-      return this.getPixel(imageData, y * imageData.width + x);
-    }
-
-    // end helper outline
-
-
+    
   },
   watch: {
     threshold: {
