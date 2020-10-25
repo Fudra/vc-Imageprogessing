@@ -109,18 +109,6 @@ export default Vue.extend({
         type: ImageTypes.MODIFIED
       });
     },
-    colorMask(pixel: number, shift: number) {
-      return (pixel >> shift) & 0xff;
-    },
-    maskRed(pixel: number): number {
-      return this.colorMask(pixel, 16);
-    },
-    maskGreen(pixel: number): number {
-      return this.colorMask(pixel, 8);
-    },
-    maskBlue(pixel: number): number {
-      return this.colorMask(pixel, 0);
-    }
   },
   watch: {
     threshold: {
