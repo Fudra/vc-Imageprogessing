@@ -71,7 +71,6 @@ export default Vue.extend({
   created() {
     window.ipcRenderer.on("imageFileSelected", async (event, args) => {
       this.image = args.contents;
-      console.log(args.contents)
     });
   },
   methods: {

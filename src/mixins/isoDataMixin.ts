@@ -13,7 +13,7 @@ export default Vue.extend({
     },
 
     calculateU(data: number[], p: number, min: number, max: number): number {
-      const reciprocalP = 1 / p;
+      const reciprocalP = 1 / (p || 1) ;
 
       let sum = 0;
 

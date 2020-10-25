@@ -145,7 +145,8 @@ export default Vue.extend({
       // isodata
       let value = 127;
       let oldValue = 0;
-      
+      let iterations = 0;
+
       do {
         oldValue = value;
         const pa = this.calculateP(countData, 0, value - 1);
@@ -155,7 +156,8 @@ export default Vue.extend({
         const ubk = this.calculateU(countData, pb, value, 256);
 
         value = this.newT(uak, ubk);
-      } while (value != oldValue)
+        iterations++;
+      } while (value != oldValue && iterations <= 20 )
 
       // set data
       this.binarizeWithThreshold(value);
