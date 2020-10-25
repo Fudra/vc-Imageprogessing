@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] - 2020-10-23
+
+## [0.4.0] - 2020-10-25 
+### Change 
+ - change from vuex to events
+ 
+### Added
+ - Add default image
+ - Add algorithms for threshold, isodata and outline
+ - add basic histogram
+ 
+## [0.3.0] - 2020-10-23 
 ### Added
  - Create basic App Layout
  - Add vuex module for loading images 
