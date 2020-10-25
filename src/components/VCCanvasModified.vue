@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col">
-    <canvas :width="size.width" :height="size.height" ref="imageCanvas" />
     <p class="px-4 py-2 text-sm text-gray-700 uppercase font-semibold">
       {{ caption }}
     </p>
+    <canvas :width="size.width" :height="size.height" ref="imageCanvas" />
   </div>
 </template>
 
@@ -53,6 +53,9 @@ export default Vue.extend({
         if (modifiedImage == null) return;
         if (this.ctx == null) return;
         // if (modifiedImage.type === ImageTypes.ORIGINAL) return;
+
+        console.log("clearRect");
+        this.ctx.clearRect(0, 0, this.size.width, this.size.height);
 
         this.ctx.putImageData(modifiedImage.imageData, 0, 0);
       },

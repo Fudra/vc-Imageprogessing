@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col">
-    <canvas :width="size.width" :height="size.height" ref="imageCanvas" />
     <p class="px-4 py-2 text-sm text-gray-700 uppercase font-semibold">
       {{ caption }}
     </p>
+    <canvas :width="size.width" :height="size.height" ref="imageCanvas" />
   </div>
 </template>
 

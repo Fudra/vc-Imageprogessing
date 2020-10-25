@@ -99,7 +99,7 @@ export default Vue.extend({
         if (this.imgDataType == ImageTypes.ORIGINAL) return;
         this.ctx.fillRect(0, 0, 600, 600);
         this.ctx.putImageData(imageData, 0, 0);
-        console.log("handler imageData", this.imgDataType)
+        console.log("handler imageData", this.imgDataType);
       }
     },
     lastChangedModified: {

@@ -77,13 +77,13 @@ export default Vue.extend({
     getOriginalImageData(): ImageData {
       console.log("getOriginalImageData", Date.now());
       return this.$store.getters[`image/originalData`];
-    },
+    }
   },
   methods: {
     async binarizeWithThreshold(threshold: number) {
       console.log("threshold", threshold);
       // get image
-      const imageData: ImageData = this.getOriginalImageData
+      const imageData: ImageData = this.getOriginalImageData;
       console.log("imageData");
       const data = imageData.data;
 
