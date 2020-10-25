@@ -6,11 +6,11 @@
 
 <script lang="ts">
 import Vue from "vue";
-import ipc from "@/mixins/ipc";
+// import ipc from "@/mixins/ipc";
 
 export default Vue.extend({
-  name: "App",
-  mixins: [ipc]
+  name: "App"
+//  mixins: [ipc]
 });
 </script>
 
