@@ -25,7 +25,10 @@
       <label
         for="threshold"
         class="block text-sm font-medium leading-5 text-gray-700"
-        >Threshold</label
+        >Threshold
+        <span class="text-gray-600 text-right">({{threshold}})</span>
+
+      </label
       >
       <input
         id="threshold"
@@ -72,7 +75,7 @@ export default Vue.extend({
     return {
       threshold: 128,
       method: "copy",
-      outline: true
+      outline: false
     } as VCBinarizeData;
   },
   props: {
@@ -83,9 +86,8 @@ export default Vue.extend({
   },
   methods: {
     copyImage() {
-      console.log(this.image)
       const data = new Uint8ClampedArray(this.image.imageData.data);
-      // emit image change
+      // emit image changed
       this.$emit("imageChange", {
         imageData: new ImageData(data, 600),
         type: ImageTypes.MODIFIED,
@@ -93,8 +95,6 @@ export default Vue.extend({
       });
     },
     async binarizeWithThreshold(threshold: number) {
-      console.log(this.image.imageData)
-      console.log("threshold", threshold);
       // get image
       const data =  new Uint8ClampedArray(this.image.imageData.data)
 
@@ -106,9 +106,7 @@ export default Vue.extend({
         // gray += data[i + 3]; // A
 
         gray = Math.round(gray / 3);
-        //const v
-        let value = Math.random() * 255; //
-        value =  gray > threshold ? 255 : 0;
+        const value =  gray > threshold ? 255 : 0;
 
         // set pixel
         data[i] = value;
@@ -122,23 +120,72 @@ export default Vue.extend({
         type: ImageTypes.MODIFIED,
         changed: Date.now()
       });
-      // await this.$store.dispatch("image/setImageData", {
-      //   imageData: new ImageData(data, 600),
-      //   type: ImageTypes.MODIFIED
-      // });
     },
-    colorMask(pixel: number, shift: number) {
-      return (pixel >> shift) & 0xff;
+    isoData() {
+      const data = new Uint8ClampedArray(this.image.imageData.data);
+
+      let countData:number[] = new Array(256).fill(0);
+      let dataMax = [];
+
+      // isodata
+      let value = 127;
+      let oldValue = 0;
+
+      // sum data
+      for (let i = 0; i < data.length; i = i + 4) {
+        let gray = data[i]; // R
+        gray += data[i + 1]; // G
+        gray += data[i + 2]; // B
+        // gray += data[i + 3]; // A
+
+        gray = Math.round(gray / 3);
+
+        countData[gray]++;
+      }
+
+
+      do {
+        oldValue = value;
+        const pa = this.calculateP(countData, 0, value - 1);
+        const pb = this.calculateP(countData, value, 256);
+
+        const uak = this.calculateU(countData, pa, 0, value - 1);
+        const ubk = this.calculateU(countData, pb, value, 256);
+
+        value = this.newT(uak, ubk);
+        console.log("round");
+      } while (value != oldValue)
+
+      // set data
+      this.binarizeWithThreshold(value);
+      this.threshold = value;
     },
-    maskRed(pixel: number): number {
-      return this.colorMask(pixel, 16);
+
+    // helper iso data
+    calculateP(data:number[], min: number, max:number) {
+      let sum = 0;
+
+      for (let i = min; i < max; i++) {
+        sum  += data[i];
+      }
+
+      return sum;
     },
-    maskGreen(pixel: number): number {
-      return this.colorMask(pixel, 8);
+    calculateU(data:number[], p: number, min: number, max:number) {
+      const reciprocalP = 1/p;
+
+      let sum = 0;
+
+      for (let i = min; i < max; i++) {
+        sum  += i * data[i];
+      }
+
+      return reciprocalP * sum;
     },
-    maskBlue(pixel: number): number {
-      return this.colorMask(pixel, 0);
+    newT(uak: number, ubk: number) {
+      return Math.round((uak + ubk) / 2);
     }
+
   },
   watch: {
     threshold: {
@@ -156,6 +203,7 @@ export default Vue.extend({
               this.binarizeWithThreshold(this.threshold)
              break;
           case "isodata":
+            this.isoData();
             break;
         }
       },

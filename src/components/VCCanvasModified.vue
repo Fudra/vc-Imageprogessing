@@ -54,7 +54,6 @@ export default Vue.extend({
         if (this.ctx == null) return;
         // if (modifiedImage.type === ImageTypes.ORIGINAL) return;
 
-        console.log("putimagedata")
         this.ctx.putImageData(modifiedImage.imageData, 0, 0);
       },
       immediate: true
